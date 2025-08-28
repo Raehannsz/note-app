@@ -1,0 +1,35 @@
+body {
+  font-family: sans-serif;
+  background-color: #f4f4f4;
+  padding: 20px;
+}
+.container {
+  max-width: 600px;
+  margin: auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+}
+input, textarea {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+button {
+  padding: 10px 20px;
+}
+.note {
+  background: #f0f0f0;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+}
+.note h3 {
+  margin: 0 0 5px;
+}
+.actions {
+  margin-top: 10px;
+}
+.actions button {
+  margin-right: 5px;
+}
