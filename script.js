@@ -20,8 +20,8 @@ function renderNotes() {
     const div = document.createElement('div');
     div.className = 'note';
     div.innerHTML = `
-      <h3>${note.title}</h3>
-      <p>${note.content}</p>
+      <h3>${escapeHTML(note.title)}</h3>
+      <pre>${escapeHTML(note.content)}</pre>
       <div class="actions">
         <button class="rounded bg-warning" onclick="editNote(${index})">Edit</button>
         <button class="rounded bg-danger" onclick="deleteNote(${index})">Hapus</button>
@@ -87,6 +87,12 @@ function saveEditedNote() {
     // Reset index
     currentEditIndex = null;
   }
+}
+
+function escapeHTML(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 renderNotes();

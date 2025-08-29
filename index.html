@@ -28,8 +28,10 @@
     </div>
   </div>
 </div>
-
-    <h1>Catatan Saya</h1>
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+      <h1 class="mb-2 mb-md-0">Catatan Saya</h1>
+      <input type="text" id="searchInput" class="form-control w-100 w-md-50" placeholder="Cari catatan..." oninput="searchNotes()" />
+    </div>
     <div id="alertBox" class="alert d-none" role="alert"></div>
     <div class="form">
       <input class="rounded mb-2 border-1" type="text" id="noteTitle" placeholder="Judul Catatan" />
