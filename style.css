@@ -1,24 +1,56 @@
+:root {
+  --background-color: #ffffff;
+  --text-color: #000000;
+  --note-bg: #f9f9f9;
+  --note-border: #ccc;
+  --input-bg: #fff;
+  --input-text: #000;
+  --input-border: #ccc;
+  --button-outline: #555;
+  --container-bg: #ffffff;
+}
+
+body.dark-theme {
+  --background-color: #121212;
+  --text-color: #ffffff;
+  --note-bg: #1e1e1e;
+  --note-border: #333;
+  --input-bg: #2a2a2a;
+  --input-text: #ffffff;
+  --input-border: #555;
+  --button-outline: #aaa;
+  --container-bg: #1a1a1a;
+}
+
 * {
   font-family: Georgia, 'Times New Roman', Times, serif;
 }
 body {
   font-family: Georgia, 'Times New Roman', Times, serif;
-  background-color: #f4f4f4;
+  background-color: var(--background-color);
+  color: var(--text-color);
   padding: 20px;
+  transition: background-color 0.3s, color 0.3s;
 }
+body.dark-theme {
+  background-color: #121212;
+  color: #ffffff;
+}
+
 .container {
   max-width: 600px;
   margin: auto;
-  background: #fff;
+  background: var(--container-bg);
   padding: 20px;
   border-radius: 8px;
+  transition: background 0.3s;
 }
+
 input, textarea {
   width: 100%;
   margin-bottom: 10px;
   padding: 10px;
   box-shadow: 4px 4px 0px 0px #333;
-
 }
 button {
   padding: 10px 20px;
@@ -52,3 +84,26 @@ button {
   margin-right: 5px;
   box-shadow: 4px 4px 0px 0px #333;
 }
+/* Tema */
+.note {
+  background-color: var(--note-bg);
+  border: 1px solid var(--note-border);
+  color: var(--text-color);
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+input,
+textarea,
+.form-control {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--input-border);
+}
+
+.btn-outline-secondary {
+  color: var(--text-color);
+  border-color: var(--button-outline);
+}
+/* END Tema */

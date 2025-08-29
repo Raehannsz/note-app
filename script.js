@@ -56,7 +56,6 @@ function searchNotes() {
   });
 }
 
-
 function addNote() {
   const title = document.getElementById('noteTitle').value;
   const content = document.getElementById('noteContent').value;
@@ -120,5 +119,21 @@ function escapeHTML(text) {
   div.textContent = text;
   return div.innerHTML;
 }
+
+function toggleTheme() {
+  const body = document.body;
+  if (body.classList.contains('dark-theme')) {
+    body.classList.remove('dark-theme');
+    body.classList.add('light-theme');
+    localStorage.setItem('theme', 'light');
+  } else {
+    body.classList.remove('light-theme');
+    body.classList.add('dark-theme');
+    localStorage.setItem('theme', 'dark');
+  }
+}
+
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.body.classList.add(savedTheme + '-theme');
 
 renderNotes();
