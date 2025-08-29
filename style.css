@@ -22,13 +22,21 @@ button {
   box-shadow: 4px 4px 0px 0px #333;
 }
 .note {
-  background: #f0f0f0;
-  padding: 15px;
-  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  padding: 1rem;
   border-radius: 6px;
+  margin-bottom: 1rem;
+  background-color: #f9f9f9;
+  position: relative;
 }
 .note h3 {
-  margin: 0 0 5px;
+  margin-bottom: 0.5rem;
+}
+.note .actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap; /* Supaya responsive jika layar sempit */
 }
 .actions {
   margin-top: 10px;
