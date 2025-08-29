@@ -6,10 +6,10 @@ function showAlert(message, type = 'success') {
   alertBox.textContent = message;
   alertBox.classList.remove('d-none');
 
-  // Sembunyikan alert setelah 3 detik
+  // Sembunyikan alert setelah 2,5 detik
   setTimeout(() => {
     alertBox.classList.add('d-none');
-  }, 3000);
+  }, 2500);
 }
 
 function renderNotes() {
@@ -22,8 +22,8 @@ function renderNotes() {
       <h3>${note.title}</h3>
       <p>${note.content}</p>
       <div class="actions">
-        <button onclick="editNote(${index})">Edit</button>
-        <button onclick="deleteNote(${index})">Hapus</button>
+        <button class="rounded bg-warning" onclick="editNote(${index})">Edit</button>
+        <button class="rounded bg-danger" onclick="deleteNote(${index})">Hapus</button>
       </div>
     `;
     container.appendChild(div);
@@ -62,7 +62,6 @@ function deleteNote(index) {
     showAlert('Catatan berhasil dihapus.', 'warning');
   }
 }
-
 
 function updateNotes() {
   localStorage.setItem('notes', JSON.stringify(notes));

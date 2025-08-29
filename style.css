@@ -17,6 +17,7 @@ input, textarea {
 }
 button {
   padding: 10px 20px;
+  box-shadow: 4px 4px 0px 0px #333;
 }
 .note {
   background: #f0f0f0;
@@ -32,4 +33,5 @@ button {
 }
 .actions button {
   margin-right: 5px;
+  box-shadow: 4px 4px 0px 0px #333;
 }
