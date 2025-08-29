@@ -44,6 +44,43 @@ body.dark-theme {
   border-radius: 8px;
   transition: background 0.3s;
 }
+
+/* Modal */
+.modal-content {
+  background-color: var(--container-bg);
+  color: var(--text-color);
+  border-radius: 8px;
+  transition: background-color 0.3s, color 0.3s;
+}
+.modal-header,
+.modal-body,
+.modal-footer {
+  background-color: var(--container-bg);
+  color: var(--text-color);
+}
+.modal-title {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+#editModalFooter {
+  background-color: var(--container-bg);
+}
+#editTitle,
+#editContent {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--input-border);
+  box-shadow: 4px 4px 0px 0px #333;
+}
+#editTitle::placeholder,
+#editContent::placeholder {
+  color: var(--input-text);
+  opacity: 0.6;
+}
+.modal-footer button {
+  box-shadow: 4px 4px 0px 0px #333;
+}
+/* END Modal */
+
 input, textarea {
   width: 100%;
   margin-bottom: 10px;
@@ -114,5 +151,4 @@ textarea::placeholder,
   color: var(--input-text);
   opacity: 0.6; /* Opsional: biar placeholder tampak beda dari isi input */
 }
-
 /* END Tema */
