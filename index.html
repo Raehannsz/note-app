@@ -9,15 +9,39 @@
 </head>
 <body>
   <div class="container">
+    <!-- Modal Edit Catatan -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalLabel">Edit Catatan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="editTitle" class="form-control mb-2" placeholder="Judul Catatan" />
+        <textarea id="editContent" class="form-control" placeholder="Isi catatan..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="saveEditedNote()">Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
     <h1>Catatan Saya</h1>
     <div id="alertBox" class="alert d-none" role="alert"></div>
     <div class="form">
-      <input class="rounded mb-2 border-sm  " type="text" id="noteTitle" placeholder="Judul Catatan" />
+      <input class="rounded mb-2 border-1" type="text" id="noteTitle" placeholder="Judul Catatan" />
       <textarea class="rounded mb-2" id="noteContent" placeholder="Isi catatan..."></textarea>
-      <button class="bg-primary text-white mb-2 rounded" onclick="addNote()">Simpan Catatan</button>
+      <button class="bg-primary mb-3 rounded" onclick="addNote()">Simpan Catatan</button>
     </div>
     <div id="notes"></div>
   </div>
+
+  <footer>
+    
+  </footer>
   <script src="script.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

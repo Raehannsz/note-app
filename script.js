@@ -1,4 +1,5 @@
 let notes = JSON.parse(localStorage.getItem('notes')) || [];
+let currentEditIndex = null;
 
 function showAlert(message, type = 'success') {
   const alertBox = document.getElementById('alertBox');
@@ -44,15 +45,14 @@ function addNote() {
   }
 }
 
-
 function editNote(index) {
   const note = notes[index];
-  const newTitle = prompt('Edit Judul:', note.title);
-  const newContent = prompt('Edit Isi:', note.content);
-  if (newTitle !== null && newContent !== null) {
-    notes[index] = { title: newTitle, content: newContent };
-    updateNotes();
-  }
+  document.getElementById('editTitle').value = note.title;
+  document.getElementById('editContent').value = note.content;
+  currentEditIndex = index;
+
+  const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+  editModal.show();
 }
 
 function deleteNote(index) {
@@ -66,6 +66,27 @@ function deleteNote(index) {
 function updateNotes() {
   localStorage.setItem('notes', JSON.stringify(notes));
   renderNotes();
+}
+
+function saveEditedNote() {
+  const newTitle = document.getElementById('editTitle').value;
+  const newContent = document.getElementById('editContent').value;
+
+  if (currentEditIndex !== null) {
+    notes[currentEditIndex] = {
+      title: newTitle,
+      content: newContent
+    };
+    renderNotes();
+    
+    // Tutup modal setelah edit
+    const modalElement = document.getElementById('editModal');
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    modal.hide();
+
+    // Reset index
+    currentEditIndex = null;
+  }
 }
 
 renderNotes();
