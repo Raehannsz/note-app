@@ -30,13 +30,12 @@ body {
   background-color: var(--background-color);
   color: var(--text-color);
   padding: 20px;
-  transition: background-color 0.3s, color 0.3s;
+  transition: background-color 0.5s, color 0.3s;
 }
 body.dark-theme {
   background-color: #121212;
   color: #ffffff;
 }
-
 .container {
   max-width: 600px;
   margin: auto;
@@ -45,7 +44,6 @@ body.dark-theme {
   border-radius: 8px;
   transition: background 0.3s;
 }
-
 input, textarea {
   width: 100%;
   margin-bottom: 10px;
@@ -93,7 +91,6 @@ button {
   border-radius: 6px;
   margin-bottom: 1rem;
 }
-
 input,
 textarea,
 .form-control {
@@ -101,9 +98,21 @@ textarea,
   color: var(--input-text);
   border: 1px solid var(--input-border);
 }
-
 .btn-outline-secondary {
   color: var(--text-color);
   border-color: var(--button-outline);
 }
+#searchInput {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--input-border);
+  box-shadow: 4px 4px 0px 0px #333;
+}
+input::placeholder,
+textarea::placeholder,
+#searchInput::placeholder {
+  color: var(--input-text);
+  opacity: 0.6; /* Opsional: biar placeholder tampak beda dari isi input */
+}
+
 /* END Tema */
