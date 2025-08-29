@@ -44,8 +44,8 @@ function searchNotes() {
       const div = document.createElement('div');
       div.className = 'note';
       div.innerHTML = `
-        <h3>${escapeHTML(note.title)}</h3>
-        <pre>${escapeHTML(note.content)}</pre>
+        <h3>${highlightMatch(note.title, query)}</h3>
+        <pre>${highlightMatch(note.content, query)}</pre>
         <div class="actions">
           <button class="rounded bg-warning" onclick="editNote(${index})">Edit</button>
         <button class="rounded bg-danger" onclick="deleteNote(${index})">Hapus</button>
@@ -55,6 +55,19 @@ function searchNotes() {
     }
   });
 }
+
+// Fungsi highlights/Marks
+function highlightMatch(text, query) {
+  if (!query) return escapeHTML(text); // tidak ada input, kembalikan teks asli
+
+  const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
+  return escapeHTML(text).replace(regex, '<mark>$1</mark>');
+}
+
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape karakter regex
+}
+// END Fungsi highlights/Marks
 
 function addNote() {
   const title = document.getElementById('noteTitle').value;

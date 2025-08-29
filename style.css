@@ -152,3 +152,8 @@ textarea::placeholder,
   opacity: 0.6; /* Opsional: biar placeholder tampak beda dari isi input */
 }
 /* END Tema */
+
+mark {
+  background-color: #ffff00;
+  padding: 0;
+}
