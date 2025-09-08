@@ -1,4 +1,4 @@
-# Simple and Light Note App
+# Simple and Fast Note App
 
 Builded using HTML, CSS, JS, and Bootstrap as a framework. Focusing in minimalist and light application.
 
