@@ -11,24 +11,44 @@
 <body>
   <div class="container">
     <!-- Modal Edit Catatan -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editModalLabel">Edit Catatan</h5>
-        <button type="button" class="btn-close border" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <input type="text" id="editTitle" class="form-control mb-2" placeholder="Judul Catatan" />
-        <textarea id="editContent" class="form-control" placeholder="Isi catatan..."></textarea>
-      </div>
-      <div class="modal-footer" id="editModalFooter">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-primary" onclick="saveEditedNote()">Simpan Perubahan</button>
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editModalLabel">Edit Catatan</h5>
+            <button type="button" class="btn-close border" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="text" id="editTitle" class="form-control mb-2" placeholder="Judul Catatan" />
+            <textarea id="editContent" class="form-control" placeholder="Isi catatan..."></textarea>
+          </div>
+          <div class="modal-footer" id="editModalFooter">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="button" class="btn btn-primary" onclick="saveEditedNote()">Simpan Perubahan</button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
+
+    <!-- Modal Lihat Catatan -->
+    <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="viewModalLabel">Lihat Catatan</h5>
+            <button type="button" class="btn-close border" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <h4 id="viewTitle" class="fw-bold"></h4>
+            <p id="viewContent" class="white-space-pre-wrap"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="d-flex col-md-12 justify-content-between mb-3">
       <h1 class="mt-1 fw-bold">Catatan Saya</h1>
       <div class="d-flex gap-3 justify-content-between mb-3">
