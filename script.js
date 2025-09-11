@@ -18,25 +18,51 @@ function renderNotes() {
   container.innerHTML = '';
 
   const gridCols = localStorage.getItem('gridCols') || '3';
-  const colClass = `col-md-${12 / gridCols}`; // Bootstrap Grid System (12 cols total)
+  const colClass = `col-${12 / gridCols} col-sm-${12 / gridCols} col-md-${12 / gridCols}` // Bootstrap Grid System (12 cols total)
 
   notes.forEach((note, index) => {
     const col = document.createElement('div');
     col.className = `${colClass} d-flex`;
 
     col.innerHTML = `
-      <div class="note-card w-100">
-        <h3>${escapeHTML(note.title)}</h3>
-        <pre>${escapeHTML(note.content)}</pre>
-        <div class="actions mt-2 d-flex gap-2">
-          <button class="btn btn-sm btn-warning" onclick="editNote(${index})">Edit</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteNote(${index})">Hapus</button>
-        </div>
-      </div>
-    `;
+  <div class="note-card w-100 position-relative">
+    <h3>${escapeHTML(note.title)}</h3>
+    <pre>${escapeHTML(note.content)}</pre>
+
+    <!-- Tombol untuk desktop -->
+    <div class="actions mt-2 d-none d-md-flex gap-2 flex-wrap">
+      <button class="btn btn-sm btn-info text-white" onclick="viewNote(${index})">Lihat</button>
+      <button class="btn btn-sm btn-warning" onclick="editNote(${index})">Edit</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteNote(${index})">Hapus</button>
+    </div>
+
+
+    <!-- Tombol untuk mobile (dropdown) -->
+    <div class="dropdown d-md-none mt-2">
+      <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fa fa-ellipsis-v"></i>
+      </button>
+      <ul class="dropdown-menu">
+        <li><button class="dropdown-item" onclick="viewNote(${index})">Lihat</button></li>
+        <li><button class="dropdown-item" onclick="editNote(${index})">Edit</button></li>
+        <li><button class="dropdown-item text-danger" onclick="deleteNote(${index})">Hapus</button></li>
+      </ul>
+    </div>
+  </div>
+`;
     container.appendChild(col);
   });
 }
+
+function viewNote(index) {
+  const note = notes[index];
+  document.getElementById('viewTitle').textContent = note.title;
+  document.getElementById('viewContent').textContent = note.content;
+
+  const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
+  viewModal.show();
+}
+
 
 function changeGridColumns() {
   const selectedCols = document.getElementById('gridSelector').value;
