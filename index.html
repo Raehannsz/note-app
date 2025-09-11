@@ -31,9 +31,17 @@
     <div class="d-flex col-md-12 justify-content-between mb-3">
       <h1 class="mt-1 fw-bold">Catatan Saya</h1>
       <div class="d-flex gap-3 justify-content-between mb-3">
-        <input type="text" id="searchInput" class="form-control w-75 mt-2" placeholder="Cari catatan..." oninput="searchNotes()" />
+        <select id="gridSelector" class="form-select w-auto mt-2 ms-2" onchange="changeGridColumns()">
+          <option value="1">1 Kolom</option>
+          <option value="2">2 Kolom</option>
+          <option value="3" selected>3 Kolom</option>
+          <option value="4">4 Kolom</option>
+        </select>
         <button class="btn btn-sm mt-2 btn-outline-secondary" onclick="toggleTheme()">Theme</button>
       </div>
+    </div>
+    <div class="d-flex flex-column align-items-left mb-3">
+      <input type="text" id="searchInput" class="form-control w-100 mt-2" placeholder="Cari catatan..." oninput="searchNotes()" />
     </div>
     <div id="alertBox" class="alert d-none" role="alert"></div>
     <div class="form">
@@ -41,7 +49,7 @@
       <textarea class="rounded mb-2" id="noteContent" placeholder="Isi catatan..."></textarea>
       <button class="bg-primary mb-3 rounded" onclick="addNote()">Simpan Catatan</button>
     </div>
-    <div id="notes"></div>
+    <div id="notes" class="row g-3"></div>
   </div>
 
   <footer class="container text-center bg-light">

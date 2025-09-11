@@ -16,19 +16,32 @@ function showAlert(message, type = 'success') {
 function renderNotes() {
   const container = document.getElementById('notes');
   container.innerHTML = '';
+
+  const gridCols = localStorage.getItem('gridCols') || '3';
+  const colClass = `col-md-${12 / gridCols}`; // Bootstrap Grid System (12 cols total)
+
   notes.forEach((note, index) => {
-    const div = document.createElement('div');
-    div.className = 'note';
-    div.innerHTML = `
-      <h3>${escapeHTML(note.title)}</h3>
-      <pre>${escapeHTML(note.content)}</pre>
-      <div class="actions">
-        <button class="rounded bg-warning" onclick="editNote(${index})">Edit</button>
-        <button class="rounded bg-danger" onclick="deleteNote(${index})">Hapus</button>
+    const col = document.createElement('div');
+    col.className = `${colClass} d-flex`;
+
+    col.innerHTML = `
+      <div class="note-card w-100">
+        <h3>${escapeHTML(note.title)}</h3>
+        <pre>${escapeHTML(note.content)}</pre>
+        <div class="actions mt-2 d-flex gap-2">
+          <button class="btn btn-sm btn-warning" onclick="editNote(${index})">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteNote(${index})">Hapus</button>
+        </div>
       </div>
     `;
-    container.appendChild(div);
+    container.appendChild(col);
   });
+}
+
+function changeGridColumns() {
+  const selectedCols = document.getElementById('gridSelector').value;
+  localStorage.setItem('gridCols', selectedCols);
+  renderNotes();
 }
 
 function searchNotes() {
@@ -148,5 +161,8 @@ function toggleTheme() {
 
 const savedTheme = localStorage.getItem('theme') || 'light';
 document.body.classList.add(savedTheme + '-theme');
+
+const savedCols = localStorage.getItem('gridCols') || '3';
+document.getElementById('gridSelector').value = savedCols;
 
 renderNotes();
