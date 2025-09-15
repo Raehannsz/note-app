@@ -61,6 +61,7 @@ function viewNote(index) {
   const note = notes[index];
   document.getElementById('viewTitle').textContent = note.title;
   document.getElementById('viewContent').textContent = note.content;
+  
 
   const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
   viewModal.show();
