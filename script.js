@@ -165,16 +165,26 @@ function updateNotes() {
 
 // Fungsi untuk menyimpan catatan yang diedit
 function saveEditedNote() {
-  const newTitle = document.getElementById('editTitle').value;
-  const newContent = document.getElementById('editContent').value;
+  const newTitle = document.getElementById('editTitle').value.trim();
+  const newContent = document.getElementById('editContent').value.trim();
 
   if (currentEditIndex !== null) {
-    notes[currentEditIndex] = {
-      title: newTitle,
-      content: newContent
-    };
-    renderNotes();
-    
+    const oldNote = notes[currentEditIndex];
+
+    const isTitleChanged = oldNote.title !== newTitle;
+    const isContentChanged = oldNote.content !== newContent;
+
+    if (!isTitleChanged && !isContentChanged) {
+      showAlert('Tidak ada perubahan yang dilakukan.', 'warning');
+    } else {
+      notes[currentEditIndex] = {
+        title: newTitle,
+        content: newContent
+      };
+      renderNotes();
+      showAlert('Catatan berhasil diubah.', 'info');
+    }
+
     // Tutup modal setelah edit
     const modalElement = document.getElementById('editModal');
     const modal = bootstrap.Modal.getInstance(modalElement);
