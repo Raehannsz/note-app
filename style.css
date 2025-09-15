@@ -103,6 +103,13 @@ button {
   white-space: pre-wrap;
   font-family: monospace; /* opsional, agar mirip code */
 }
+.note-card pre {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block; 
+  max-width: 100%;  
+}
 /* Tema */
 .note {
   background-color: var(--note-bg);
