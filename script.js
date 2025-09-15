@@ -28,26 +28,25 @@ function renderNotes() {
     col.className = `${colClass} d-flex`;
 
     col.innerHTML = `
-  <div class="note-card w-100 position-relative">
-    <h3>${escapeHTML(note.title)}</h3>
-    <pre>${escapeHTML(note.content)}</pre>
+    <div class="note-card w-100 position-relative">
+      <h3>${escapeHTML(note.title)}</h3>
+      <pre>${escapeHTML(note.content)}</pre>
 
-    <!-- Tombol untuk desktop -->
-    <div class="actions mt-2 d-none d-md-flex gap-2 flex-wrap">
-      <button class="btn btn-sm btn-info text-white" onclick="viewNote(${index})">Lihat</button>
-      <button class="btn btn-sm btn-warning" onclick="editNote(${index})">Edit</button>
-      <button class="btn btn-sm btn-danger" onclick="deleteNote(${index})">Hapus</button>
-    </div>
+      <!-- Tombol untuk desktop -->
+      <div class="actions mt-2 d-none d-md-flex gap-2 flex-wrap">
+        <button class="btn btn-sm btn-info text-white" onclick="viewNote(${index})">Lihat</button>
+        <button class="btn btn-sm btn-warning" onclick="editNote(${index})">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteNote(${index})">Hapus</button>
+      </div>
 
     <!-- Tombol untuk mobile (dropdown) -->
     <div class="dropdown d-md-none mt-2">
       <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="fa fa-ellipsis-v"></i>
       </button>
       <ul class="dropdown-menu">
-        <li><button class="dropdown-item" onclick="viewNote(${index})">Lihat</button></li>
-        <li><button class="dropdown-item" onclick="editNote(${index})">Edit</button></li>
-        <li><button class="dropdown-item text-danger" onclick="deleteNote(${index})">Hapus</button></li>
+        <li><button class="dropdown-item bg-primary text-white rounded-1 fw-bold mb-2" onclick="viewNote(${index})">Lihat</button></li>
+        <li><button class="dropdown-item bg-warning text-white rounded-1 fw-bold mb-2" onclick="editNote(${index})">Edit</button></li>
+        <li><button class="dropdown-item bg-danger text-white rounded-1 fw-bold" onclick="deleteNote(${index})">Hapus</button></li>
       </ul>
     </div>
   </div>
