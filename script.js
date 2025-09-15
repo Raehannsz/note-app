@@ -1,6 +1,7 @@
 let notes = JSON.parse(localStorage.getItem('notes')) || [];
 let currentEditIndex = null;
 
+// fungsi untuk menampilkan alert
 function showAlert(message, type = 'success') {
   const alertBox = document.getElementById('alertBox');
   alertBox.className = `alert alert-${type}`;
@@ -12,7 +13,9 @@ function showAlert(message, type = 'success') {
     alertBox.classList.add('d-none');
   }, 2500);
 }
+// END fungsi untuk menampilkan alert
 
+// fungsi untuk menampilkan catatan / merender notes
 function renderNotes() {
   const container = document.getElementById('notes');
   container.innerHTML = '';
@@ -36,7 +39,6 @@ function renderNotes() {
       <button class="btn btn-sm btn-danger" onclick="deleteNote(${index})">Hapus</button>
     </div>
 
-
     <!-- Tombol untuk mobile (dropdown) -->
     <div class="dropdown d-md-none mt-2">
       <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -53,7 +55,9 @@ function renderNotes() {
     container.appendChild(col);
   });
 }
+// END fungsi untuk menampilkan catatan / merender notes
 
+// Fungsi untuk melihat catatan
 function viewNote(index) {
   const note = notes[index];
   document.getElementById('viewTitle').textContent = note.title;
@@ -62,14 +66,17 @@ function viewNote(index) {
   const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
   viewModal.show();
 }
+// END Fungsi untuk melihat catatan
 
-
+// Fungsi untuk mengubah jumlah kolom grid
 function changeGridColumns() {
   const selectedCols = document.getElementById('gridSelector').value;
   localStorage.setItem('gridCols', selectedCols);
   renderNotes();
 }
+// END Fungsi untuk mengubah jumlah kolom grid
 
+// Fungsi pencarian catatan
 function searchNotes() {
   const query = document.getElementById('searchInput').value.toLowerCase();
   const container = document.getElementById('notes');
@@ -94,6 +101,7 @@ function searchNotes() {
     }
   });
 }
+// END Fungsi pencarian catatan
 
 // Fungsi highlights/Marks
 function highlightMatch(text, query) {
@@ -102,12 +110,15 @@ function highlightMatch(text, query) {
   const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
   return escapeHTML(text).replace(regex, '<mark>$1</mark>');
 }
+// END Fungsi highlights/Marks
 
+// Fungsi hightlights/Marks
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape karakter regex
 }
 // END Fungsi highlights/Marks
 
+// Fungsi untuk menambahkan catatan baru
 function addNote() {
   const title = document.getElementById('noteTitle').value;
   const content = document.getElementById('noteContent').value;
@@ -121,7 +132,9 @@ function addNote() {
     showAlert('Judul dan isi tidak boleh kosong!', 'danger');
   }
 }
+//END Fungsi untuk menambahkan catatan baru
 
+// Fungsi untuk mengedit catatan
 function editNote(index) {
   const note = notes[index];
   document.getElementById('editTitle').value = note.title;
@@ -131,7 +144,9 @@ function editNote(index) {
   const editModal = new bootstrap.Modal(document.getElementById('editModal'));
   editModal.show();
 }
+// END Fungsi untuk mengedit catatan
 
+// Fungsi untuk menghapus catatan
 function deleteNote(index) {
   if (confirm('Hapus catatan ini?')) {
     notes.splice(index, 1);
@@ -139,12 +154,16 @@ function deleteNote(index) {
     showAlert('Catatan berhasil dihapus.', 'warning');
   }
 }
+// END Fungsi untuk menghapus catatan
 
+// Fungsi untuk memperbarui localStorage dan merender ulang catatan
 function updateNotes() {
   localStorage.setItem('notes', JSON.stringify(notes));
   renderNotes();
 }
+// END Fungsi untuk memperbarui localStorage dan merender ulang catatan
 
+// Fungsi untuk menyimpan catatan yang diedit
 function saveEditedNote() {
   const newTitle = document.getElementById('editTitle').value;
   const newContent = document.getElementById('editContent').value;
@@ -165,13 +184,17 @@ function saveEditedNote() {
     currentEditIndex = null;
   }
 }
+// END Fungsi untuk menyimpan catatan yang diedit
 
+// Fungsi untuk mengamankan input HTML
 function escapeHTML(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
 }
+// END Fungsi untuk mengamankan input HTML
 
+// Fungsi Tema gelap/terang
 function toggleTheme() {
   const body = document.body;
   if (body.classList.contains('dark-theme')) {
@@ -184,11 +207,15 @@ function toggleTheme() {
     localStorage.setItem('theme', 'dark');
   }
 }
+// END Fungsi Tema gelap/terang
 
+// Inisialisasi tema berdasarkan preferensi yang disimpan
 const savedTheme = localStorage.getItem('theme') || 'light';
 document.body.classList.add(savedTheme + '-theme');
 
+// Inisialisasi pilihan grid berdasarkan preferensi yang disimpan
 const savedCols = localStorage.getItem('gridCols') || '3';
 document.getElementById('gridSelector').value = savedCols;
 
+// Render catatan saat halaman dimuat
 renderNotes();
