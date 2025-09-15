@@ -21,12 +21,7 @@ body.dark-theme {
   --button-outline: #aaa;
   --container-bg: #1a1a1a;
 }
-
-* {
-  font-family: Georgia, 'Times New Roman', Times, serif;
-}
 body {
-  font-family: Georgia, 'Times New Roman', Times, serif;
   background-color: var(--background-color);
   color: var(--text-color);
   padding: 20px;
@@ -96,7 +91,6 @@ button {
 }
 .note {
   border: 1px solid #ccc;
-  padding: 1rem;
   border-radius: 6px;
   margin-bottom: 1rem;
   background-color: #f9f9f9;
@@ -108,19 +102,6 @@ button {
 .note-content {
   white-space: pre-wrap;
   font-family: monospace; /* opsional, agar mirip code */
-}
-.note .actions {
-  margin-top: 1rem;
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap; /* Supaya responsive jika layar sempit */
-}
-.actions {
-  margin-top: 10px;
-}
-.actions button {
-  margin-right: 5px;
-  box-shadow: 4px 4px 0px 0px #333;
 }
 /* Tema */
 .note {
@@ -160,7 +141,6 @@ mark {
   background-color: #ffff00;
   padding: 0;
 }
-
 .note-card {
   background-color: var(--note-bg);
   border: 1px solid var(--note-border);
@@ -170,8 +150,6 @@ mark {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   position: relative;
 }
-
 .white-space-pre-wrap {
   white-space: pre-wrap;
 }
-
