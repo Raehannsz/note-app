@@ -156,6 +156,12 @@ textarea::placeholder,
   border: 1px solid var(--button-outline);
 }
 
+.magnifying-glass-icon {
+  box-shadow: 4px 4px 0px 0px #333;
+  padding: 10px;
+  border-radius: 0 4px 4px 0;
+}
+
 mark {
   background-color: #ffff00;
   padding: 0;
