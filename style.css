@@ -110,6 +110,12 @@ button {
   display: block; 
   max-width: 100%;  
 }
+.note-card h3 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
 /* Tema */
 .note {
   background-color: var(--note-bg);
