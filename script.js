@@ -184,6 +184,8 @@ function saveEditedNote() {
       showAlert('Catatan berhasil diubah.', 'info');
     }
 
+    document.getElementById('noteTitle').focus();
+
     // Tutup modal setelah edit
     const modalElement = document.getElementById('editModal');
     const modal = bootstrap.Modal.getInstance(modalElement);
