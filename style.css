@@ -150,6 +150,12 @@ textarea::placeholder,
 }
 /* END Tema */
 
+#gridSelector {
+  background-color: var(--note-bg);
+  color: var(--text-color);
+  border: 1px solid var(--button-outline);
+}
+
 mark {
   background-color: #ffff00;
   padding: 0;
