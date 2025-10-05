@@ -161,7 +161,14 @@ textarea::placeholder,
   padding: 10px;
   border-radius: 0 4px 4px 0;
 }
-
+.pinned {
+  color: cornsilk;
+  transform: rotate(0deg);
+}
+.unpinned {
+  color: gray;
+  transform: rotate(45deg); /* atau angle lain untuk menunjukkan tidak aktif */
+}
 mark {
   background-color: #ffff00;
   padding: 0;
