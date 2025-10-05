@@ -36,7 +36,7 @@ function renderNotes() {
 
     col.innerHTML = `
       <div class="note-card w-100 position-relative">
-        <button class="pin-btn btn btn-sm text-white btn-secondary position-absolute top-0 end-0 m-2" onclick="togglePin(${index})">
+        <button class="pin-btn btn btn-sm text-white btn-gray position-absolute top-0 end-0 m-2" onclick="togglePin(${index})">
           <i class="fa-solid fa-thumbtack ${note.pinned ? 'pinned' : 'unpinned'}"></i>
         </button>
         <h3>${escapeHTML(note.title)}</h3>
