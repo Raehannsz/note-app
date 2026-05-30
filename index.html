@@ -3,86 +3,141 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aplikasi Catatan</title>
+  <title>Catatan Saya</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
 </head>
-<body>
-  <div class="container">
-    <!-- Modal Edit Catatan -->
-    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="editModalLabel">Edit Catatan</h5>
-            <button type="button" class="btn-close border" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <h5>Judul Catatan</h5>
-            <input type="text" id="editTitle" class="form-control mb-3" placeholder="Judul Catatan" />
-            <h5>Isi Catatan</h5>
-            <textarea id="editContent" class="form-control" rows="10" placeholder="Isi catatan..."></textarea>
-          </div>
-          <div class="modal-footer" id="editModalFooter">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-            <button type="button" class="btn btn-primary" onclick="saveEditedNote()">Simpan Perubahan</button>
-          </div>
-        </div>
-      </div>
-    </div>
+<body class="light-theme">
 
-    <!-- Modal Lihat Catatan -->
-    <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="viewModalLabel"></h5>
-            <button type="button" class="btn-close border" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <h4 id="viewTitle" class="fw-bold"></h4>
-            <p id="viewContent" class="white-space-pre-wrap"></p>
-          </div>
-          <div class="modal-footer" id="viewModalFooter">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- Toast Notification -->
+  <div id="toast" class="toast" role="alert" aria-live="polite"></div>
 
-    <div class="d-flex col-md-12 justify-content-between mb-3">
-      <h1 class="mt-1 fw-bold">Catatan Saya</h1>
-      <div class="d-flex gap-3 justify-content-between mb-3">
-        <select id="gridSelector" class="form-select w-auto mt-2 ms-2" onchange="changeGridColumns()">
-          <option value="1">1 Kolom</option>
-          <option value="2">2 Kolom</option>
-          <option value="3" selected>3 Kolom</option>
-          <option value="4">4 Kolom</option>
-        </select>
-        <button class="btn btn-sm mt-2 btn-outline-secondary" onclick="toggleTheme()">Theme</button>
+  <!-- Modal Edit -->
+  <div class="modal-overlay" id="editOverlay">
+    <div class="modal-box" id="editModal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+      <div class="modal-header">
+        <h2 id="editModalTitle"><i class="fa-solid fa-pen-to-square"></i> Edit Catatan</h2>
+        <button class="modal-close" onclick="closeModal('edit')" aria-label="Tutup modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <label for="editTitle">Judul</label>
+        <input type="text" id="editTitle" placeholder="Judul catatan..." autocomplete="off" />
+        <label for="editContent">Isi Catatan</label>
+        <textarea id="editContent" rows="8" placeholder="Tulis isi catatan di sini..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('edit')">Batal</button>
+        <button class="btn btn-primary" onclick="saveEditedNote()">
+          <i class="fa-solid fa-floppy-disk"></i> Simpan
+        </button>
       </div>
     </div>
-    <div class="input-group mt-2 mb-3">
-  <span class="input-group-text magnifying-glass-icon">
-    <i class="fa-solid fa-magnifying-glass text-muted"></i>
-  </span>
-  <input type="text" id="searchInput" class="form-control" placeholder="Cari catatan..." oninput="searchNotes" 
-  />
-</div>
-    <div id="alertBox" class="alert d-none" role="alert"></div>
-    <div class="form">
-      <input class="rounded mb-2 border-1" type="text" id="noteTitle" placeholder="Judul Catatan" />
-      <textarea class="rounded mb-2" id="noteContent" placeholder="Isi catatan..."></textarea>
-      <button class="bg-primary mb-3 rounded" onclick="addNote()">Simpan Catatan</button>
-    </div>
-    <div id="notes" class="row g-3"></div>
   </div>
 
-  <footer class="container text-center mt-4">
-    copyright &copy; 2025 - <strong><span>Raehan MH</span></strong>
-  </footer>
+  <!-- Modal Lihat -->
+  <div class="modal-overlay" id="viewOverlay">
+    <div class="modal-box" id="viewModal" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
+      <div class="modal-header">
+        <h2 id="viewModalTitle" class="view-title-label"><i class="fa-regular fa-eye"></i> Lihat Catatan</h2>
+        <button class="modal-close" onclick="closeModal('view')" aria-label="Tutup modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <h3 id="viewTitle" class="view-note-title"></h3>
+        <pre id="viewContent" class="view-note-content"></pre>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('view')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Shell -->
+  <div class="app-wrapper">
+    <!-- Sidebar / Header Area -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo-mark">✦</div>
+        <h1 class="app-title">Catatan<span class="title-accent">Saya</span></h1>
+      </div>
+      <div class="header-right">
+        <button class="icon-btn" onclick="toggleTheme()" title="Ganti tema" aria-label="Toggle tema">
+          <i class="fa-solid fa-circle-half-stroke"></i>
+        </button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <!-- Input Panel -->
+      <aside class="input-panel">
+        <div class="panel-label">Catatan Baru</div>
+        <input class="field" type="text" id="noteTitle" placeholder="Judul catatan..." autocomplete="off" />
+        <textarea class="field" id="noteContent" placeholder="Tulis sesuatu..." rows="5"></textarea>
+        <button class="btn btn-primary btn-full" onclick="addNote()">
+          <i class="fa-solid fa-plus"></i> Simpan Catatan
+        </button>
+      </aside>
+
+      <!-- Notes Area -->
+      <section class="notes-area">
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="search-wrap">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="searchInput" class="search-field" placeholder="Cari catatan..." oninput="searchNotes()" />
+            <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none" aria-label="Hapus pencarian">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="view-controls">
+            <button class="view-btn active" id="viewGrid" onclick="setView('grid')" title="Grid view" aria-label="Tampilan grid">
+              <i class="fa-solid fa-grip"></i>
+            </button>
+            <button class="view-btn" id="viewList" onclick="setView('list')" title="List view" aria-label="Tampilan list">
+              <i class="fa-solid fa-list"></i>
+            </button>
+            <select id="gridSelector" class="cols-select" onchange="changeGridColumns()" aria-label="Jumlah kolom">
+              <option value="1">1 kol</option>
+              <option value="2">2 kol</option>
+              <option value="3" selected>3 kol</option>
+              <option value="4">4 kol</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Stats bar -->
+        <div class="stats-bar" id="statsBar"></div>
+
+        <!-- Notes Container -->
+        <div id="notes" class="notes-grid"></div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display:none">
+          <div class="empty-icon">📝</div>
+          <p class="empty-title">Belum ada catatan</p>
+          <p class="empty-sub">Mulai tulis catatan pertamamu di sebelah kiri.</p>
+        </div>
+
+        <!-- No Results -->
+        <div id="noResults" class="empty-state" style="display:none">
+          <div class="empty-icon">🔍</div>
+          <p class="empty-title">Tidak ditemukan</p>
+          <p class="empty-sub">Coba kata kunci lain.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      &copy; 2025 <strong>Raehan MH</strong>
+    </footer>
+  </div>
+
   <script src="script.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
