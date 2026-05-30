@@ -144,7 +144,7 @@ function renderNotes(filteredList = null) {
     card.dataset.id = note.id;
 
     // Format tanggal singkat
-    const date = note.createdAt ? new Date(note.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '';
+    const date = note.createdAt ? new Date(note.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
 
     // Highlight untuk search
     const titleHTML = isSearch && searchQuery
