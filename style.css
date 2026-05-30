@@ -1,12 +1,12 @@
 /* ─── Fonts & Reset ─────────────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* ─── Design Tokens ─────────────────────────────────────────────────────────── */
 :root {
-  --font-display: 'Instrument Serif', Georgia, serif;
-  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-display: 'Google Sans', sans-serif;
+  --font-body: 'Google Sans', sans-serif;
 
   /* Light */
   --bg: #f5f2ec;
