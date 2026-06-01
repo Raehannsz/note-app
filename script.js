@@ -1,16 +1,16 @@
 // ─── State ───────────────────────────────────────────────────────────────────
 let notes = [];
 let currentEditIndex = null;
-let currentView = 'grid'; // 'grid' | 'list'
+let currentView = 'grid';
 let searchQuery = '';
+let isMobile = false;
 
-// Muat catatan dari localStorage dengan migrasi ke format ID unik
+// ─── Load Notes ───────────────────────────────────────────────────────────────
 function loadNotes() {
   const raw = localStorage.getItem('notes');
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
-    // Migrasi: tambahkan id unik jika belum ada
     return parsed.map((note, i) => ({
       id: note.id || Date.now() + i,
       title: note.title || '',
@@ -25,16 +25,65 @@ function loadNotes() {
 
 notes = loadNotes();
 
-// ─── Toast / Alert ────────────────────────────────────────────────────────────
+// ─── PWA: Service Worker ──────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.warn('SW failed:', err));
+  });
+}
+
+// ─── PWA: Install Banner ──────────────────────────────────────────────────────
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  // Tampilkan banner hanya jika belum pernah ditolak
+  if (!localStorage.getItem('installDismissed')) {
+    const banner = document.getElementById('installBanner');
+    if (banner) banner.style.display = 'flex';
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  const banner = document.getElementById('installBanner');
+  if (banner) banner.style.display = 'none';
+  showToast('Aplikasi berhasil dipasang! 🎉', 'success');
+});
+
+function setupInstallBanner() {
+  const installBtn = document.getElementById('installBtn');
+  const dismissBtn = document.getElementById('installDismiss');
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      document.getElementById('installBanner').style.display = 'none';
+      if (outcome === 'dismissed') localStorage.setItem('installDismissed', '1');
+    });
+  }
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', () => {
+      document.getElementById('installBanner').style.display = 'none';
+      localStorage.setItem('installDismissed', '1');
+    });
+  }
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
 let toastTimer = null;
 function showToast(message, type = 'success') {
   const toast = document.getElementById('toast');
   toast.textContent = message;
   toast.className = `toast toast-${type} toast-show`;
   if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => {
-    toast.classList.remove('toast-show');
-  }, 2800);
+  toastTimer = setTimeout(() => toast.classList.remove('toast-show'), 2800);
 }
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
@@ -42,7 +91,6 @@ function openModal(type) {
   const overlay = document.getElementById(type + 'Overlay');
   overlay.classList.add('active');
   document.body.classList.add('modal-open');
-  // Focus first input
   setTimeout(() => {
     const first = overlay.querySelector('input, textarea, button.btn-ghost');
     if (first) first.focus();
@@ -50,52 +98,171 @@ function openModal(type) {
 }
 
 function closeModal(type) {
-  const overlay = document.getElementById(type + 'Overlay');
-  overlay.classList.remove('active');
+  document.getElementById(type + 'Overlay').classList.remove('active');
   document.body.classList.remove('modal-open');
 }
 
-// Tutup modal saat klik overlay
+// ─── Mobile Sheet (FAB → slide-up form) ──────────────────────────────────────
+function openSheet() {
+  const sheet = document.getElementById('formSheet');
+  const overlay = document.getElementById('sheetOverlay');
+  sheet.classList.add('active');
+  overlay.classList.add('active');
+  document.body.classList.add('modal-open');
+  setTimeout(() => {
+    const titleInput = document.getElementById('sheetTitle');
+    if (titleInput) titleInput.focus();
+  }, 300);
+}
+
+function closeSheet() {
+  document.getElementById('formSheet').classList.remove('active');
+  document.getElementById('sheetOverlay').classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
+function addNoteFromSheet() {
+  const title = document.getElementById('sheetTitle').value.trim();
+  const content = document.getElementById('sheetContent').value.trim();
+  if (_addNote(title, content)) {
+    document.getElementById('sheetTitle').value = '';
+    document.getElementById('sheetContent').value = '';
+    closeSheet();
+  }
+}
+
+// ─── Detect mobile ────────────────────────────────────────────────────────────
+function checkMobile() {
+  isMobile = window.innerWidth <= 900;
+  const fab = document.getElementById('fab');
+  const inputPanel = document.getElementById('inputPanel');
+  const emptySubText = document.getElementById('emptySubText');
+
+  if (fab) fab.style.display = isMobile ? 'flex' : 'none';
+  if (inputPanel) inputPanel.style.display = isMobile ? 'none' : 'flex';
+  if (emptySubText) {
+    emptySubText.textContent = isMobile
+      ? 'Ketuk tombol + di bawah untuk mulai menulis.'
+      : 'Mulai tulis catatan pertamamu di sebelah kiri.';
+  }
+
+  // Di mobile default 2 kolom, desktop 3
+  if (isMobile && !localStorage.getItem('gridColsSet')) {
+    const sel = document.getElementById('gridSelector');
+    if (sel && !localStorage.getItem('gridCols')) {
+      sel.value = '2';
+      localStorage.setItem('gridCols', '2');
+    }
+  }
+}
+
+// ─── DOMContentLoaded ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  // Modal overlay click-outside
   ['editOverlay', 'viewOverlay'].forEach(id => {
-    document.getElementById(id).addEventListener('click', (e) => {
+    document.getElementById(id)?.addEventListener('click', (e) => {
       if (e.target.id === id) closeModal(id.replace('Overlay', ''));
     });
   });
 
-  // Escape key tutup modal
+  // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeModal('edit');
       closeModal('view');
+      closeSheet();
     }
-    // Ctrl/Cmd + Enter untuk simpan catatan baru
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       const active = document.activeElement;
-      if (active.id === 'noteTitle' || active.id === 'noteContent') {
-        addNote();
-      }
+      if (['noteTitle', 'noteContent'].includes(active?.id)) addNote();
+      if (['editTitle', 'editContent'].includes(active?.id)) saveEditedNote();
+      if (['sheetTitle', 'sheetContent'].includes(active?.id)) addNoteFromSheet();
     }
   });
 
-  // Inisialisasi preferensi
+  // Tema
   const savedTheme = localStorage.getItem('theme') || 'light';
-  document.body.className = savedTheme + '-theme';
+  applyTheme(savedTheme);
 
+  // Grid
   const savedCols = localStorage.getItem('gridCols') || '3';
   const sel = document.getElementById('gridSelector');
   if (sel) sel.value = savedCols;
 
+  // View mode
   const savedView = localStorage.getItem('viewMode') || 'grid';
-  setView(savedView, false); // false = jangan save ulang
+  setView(savedView, false);
+
+  // Mobile detection
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
+
+  // Swipe-down to close sheet
+  setupSheetSwipe();
+
+  // PWA install banner
+  setupInstallBanner();
+
+  // Handle #new shortcut dari PWA shortcut
+  if (window.location.hash === '#new') {
+    setTimeout(() => {
+      if (isMobile) openSheet();
+      else document.getElementById('noteTitle')?.focus();
+    }, 200);
+  }
 
   renderNotes();
 });
 
+// ─── Swipe gesture untuk sheet ───────────────────────────────────────────────
+function setupSheetSwipe() {
+  const sheet = document.getElementById('formSheet');
+  if (!sheet) return;
+  let startY = 0;
+  let isDragging = false;
+
+  sheet.addEventListener('touchstart', (e) => {
+    // Hanya drag dari handle
+    if (e.target.closest('.modal-handle') || e.target.closest('.sheet-header')) {
+      startY = e.touches[0].clientY;
+      isDragging = true;
+    }
+  }, { passive: true });
+
+  sheet.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const dy = e.touches[0].clientY - startY;
+    if (dy > 0) {
+      sheet.style.transform = `translateY(${dy}px)`;
+    }
+  }, { passive: true });
+
+  sheet.addEventListener('touchend', (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    const dy = e.changedTouches[0].clientY - startY;
+    sheet.style.transform = '';
+    if (dy > 100) closeSheet();
+  });
+}
+
+// ─── Theme ────────────────────────────────────────────────────────────────────
+function applyTheme(theme) {
+  document.body.className = theme + '-theme';
+  const meta = document.getElementById('metaThemeColor');
+  if (meta) meta.content = theme === 'dark' ? '#1a1917' : '#2d6a4f';
+}
+
+function toggleTheme() {
+  const isDark = document.body.classList.contains('dark-theme');
+  const next = isDark ? 'light' : 'dark';
+  applyTheme(next);
+  localStorage.setItem('theme', next);
+}
+
 // ─── Render ───────────────────────────────────────────────────────────────────
 function getNoteColorClass(index) {
-  const classes = ['note-color-1', 'note-color-2', 'note-color-3', 'note-color-4', 'note-color-5'];
-  return classes[index % classes.length];
+  return ['note-color-1','note-color-2','note-color-3','note-color-4','note-color-5'][index % 5];
 }
 
 function renderNotes(filteredList = null) {
@@ -105,15 +272,14 @@ function renderNotes(filteredList = null) {
   const statsBar = document.getElementById('statsBar');
   container.innerHTML = '';
 
-  // Tentukan daftar yang ditampilkan
   const isSearch = filteredList !== null;
   const displayList = filteredList ?? getSortedNotes();
-
-  // Update stats
   const pinnedCount = notes.filter(n => n.pinned).length;
-  statsBar.textContent = `${notes.length} catatan${pinnedCount > 0 ? ` · ${pinnedCount} dipin` : ''}`;
 
-  // Sembunyikan/tampilkan empty states
+  statsBar.textContent = notes.length > 0
+    ? `${notes.length} catatan${pinnedCount > 0 ? ` · ${pinnedCount} dipin` : ''}`
+    : '';
+
   if (notes.length === 0) {
     emptyState.style.display = '';
     noResults.style.display = 'none';
@@ -127,58 +293,48 @@ function renderNotes(filteredList = null) {
   }
   noResults.style.display = 'none';
 
-  // Grid columns
   const gridCols = localStorage.getItem('gridCols') || '3';
   container.style.setProperty('--grid-cols', gridCols);
-  if (currentView === 'list') {
-    container.classList.add('notes-list-view');
-  } else {
-    container.classList.remove('notes-list-view');
-  }
+  container.classList.toggle('notes-list-view', currentView === 'list');
 
-  displayList.forEach((note, displayIndex) => {
-    // Cari original index di notes[]
+  displayList.forEach((note) => {
     const originalIndex = notes.findIndex(n => n.id === note.id);
     const card = document.createElement('div');
     card.className = `note-card ${getNoteColorClass(originalIndex)} ${note.pinned ? 'is-pinned' : ''}`;
     card.dataset.id = note.id;
 
-    // Format tanggal singkat
-    const date = note.createdAt ? new Date(note.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+    const date = note.createdAt
+      ? new Date(note.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+      : '';
 
-    // Highlight untuk search
-    const titleHTML = isSearch && searchQuery
-      ? highlightMatch(note.title, searchQuery)
-      : escapeHTML(note.title);
-    const contentHTML = isSearch && searchQuery
-      ? highlightMatch(note.content, searchQuery)
-      : escapeHTML(note.content);
+    const titleHTML = isSearch && searchQuery ? highlightMatch(note.title, searchQuery) : escapeHTML(note.title);
+    const contentHTML = isSearch && searchQuery ? highlightMatch(note.content, searchQuery) : escapeHTML(note.content);
 
     card.innerHTML = `
       <div class="note-card-top">
         <div class="note-card-meta">
-          ${note.pinned ? '<span class="pin-badge" title="Dipin"><i class="fa-solid fa-thumbtack"></i></span>' : ''}
+          ${note.pinned ? '<span class="pin-badge"><i class="fa-solid fa-thumbtack"></i></span>' : ''}
           <span class="note-date">${date}</span>
         </div>
         <div class="note-card-actions-top">
-          <button class="icon-btn pin-btn ${note.pinned ? 'pinned' : ''}" onclick="togglePin(${originalIndex})" title="${note.pinned ? 'Lepas pin' : 'Pin catatan'}" aria-label="${note.pinned ? 'Lepas pin' : 'Pin catatan'}">
+          <button class="icon-btn pin-btn ${note.pinned ? 'pinned' : ''}"
+            onclick="togglePin(${originalIndex})"
+            aria-label="${note.pinned ? 'Lepas pin' : 'Pin'}">
             <i class="fa-solid fa-thumbtack"></i>
           </button>
-          <button class="icon-btn" onclick="editNote(${originalIndex})" title="Edit" aria-label="Edit catatan">
+          <button class="icon-btn" onclick="editNote(${originalIndex})" aria-label="Edit">
             <i class="fa-solid fa-pen"></i>
           </button>
-          <button class="icon-btn btn-danger-icon" onclick="deleteNote(${originalIndex})" title="Hapus" aria-label="Hapus catatan">
+          <button class="icon-btn btn-danger-icon" onclick="deleteNote(${originalIndex})" aria-label="Hapus">
             <i class="fa-solid fa-trash"></i>
           </button>
         </div>
       </div>
-      <div class="note-card-body" onclick="viewNote(${originalIndex})" role="button" tabindex="0" aria-label="Lihat catatan: ${escapeHTML(note.title)}">
+      <div class="note-card-body" onclick="viewNote(${originalIndex})" role="button" tabindex="0" aria-label="Lihat: ${escapeHTML(note.title)}">
         <h3 class="note-title">${titleHTML}</h3>
         <p class="note-preview">${contentHTML}</p>
-      </div>
-    `;
+      </div>`;
 
-    // Keyboard accessibility untuk klik card
     card.querySelector('.note-card-body').addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') viewNote(originalIndex);
     });
@@ -188,49 +344,30 @@ function renderNotes(filteredList = null) {
 }
 
 function getSortedNotes() {
-  const pinned = notes.filter(n => n.pinned);
-  const unpinned = notes.filter(n => !n.pinned);
-  return [...pinned, ...unpinned];
+  return [...notes.filter(n => n.pinned), ...notes.filter(n => !n.pinned)];
 }
 
 // ─── CRUD ─────────────────────────────────────────────────────────────────────
+function _addNote(title, content) {
+  if (!title && !content) { showToast('Judul dan isi tidak boleh kosong!', 'error'); return false; }
+  if (!title) { showToast('Judul tidak boleh kosong!', 'error'); return false; }
+  if (!content) { showToast('Isi catatan tidak boleh kosong!', 'error'); return false; }
+
+  notes.unshift({ id: Date.now(), title, content, pinned: false, createdAt: Date.now() });
+  saveNotes();
+  clearSearch();
+  showToast('Catatan ditambahkan!', 'success');
+  return true;
+}
+
 function addNote() {
   const title = document.getElementById('noteTitle').value.trim();
   const content = document.getElementById('noteContent').value.trim();
-
-  if (!title && !content) {
-    showToast('Judul dan isi tidak boleh kosong!', 'error');
+  if (_addNote(title, content)) {
+    document.getElementById('noteTitle').value = '';
+    document.getElementById('noteContent').value = '';
     document.getElementById('noteTitle').focus();
-    return;
   }
-  if (!title) {
-    showToast('Judul tidak boleh kosong!', 'error');
-    document.getElementById('noteTitle').focus();
-    return;
-  }
-  if (!content) {
-    showToast('Isi catatan tidak boleh kosong!', 'error');
-    document.getElementById('noteContent').focus();
-    return;
-  }
-
-  const newNote = {
-    id: Date.now(),
-    title,
-    content,
-    pinned: false,
-    createdAt: Date.now(),
-  };
-
-  notes.unshift(newNote); // tambah di depan agar muncul duluan
-  saveNotes();
-  document.getElementById('noteTitle').value = '';
-  document.getElementById('noteContent').value = '';
-  document.getElementById('noteTitle').focus();
-
-  // Clear search jika ada
-  clearSearch();
-  showToast('Catatan berhasil ditambahkan!', 'success');
 }
 
 function viewNote(index) {
@@ -252,62 +389,36 @@ function editNote(index) {
 
 function saveEditedNote() {
   if (currentEditIndex === null) return;
-
   const newTitle = document.getElementById('editTitle').value.trim();
   const newContent = document.getElementById('editContent').value.trim();
+  if (!newTitle) { showToast('Judul tidak boleh kosong!', 'error'); document.getElementById('editTitle').focus(); return; }
+  if (!newContent) { showToast('Isi tidak boleh kosong!', 'error'); document.getElementById('editContent').focus(); return; }
 
-  if (!newTitle) {
-    showToast('Judul tidak boleh kosong!', 'error');
-    document.getElementById('editTitle').focus();
-    return;
-  }
-  if (!newContent) {
-    showToast('Isi catatan tidak boleh kosong!', 'error');
-    document.getElementById('editContent').focus();
-    return;
-  }
-
-  const oldNote = notes[currentEditIndex];
-  if (oldNote.title === newTitle && oldNote.content === newContent) {
+  const old = notes[currentEditIndex];
+  if (old.title === newTitle && old.content === newContent) {
     showToast('Tidak ada perubahan.', 'info');
     closeModal('edit');
     return;
   }
-
-  // BUG FIX: Pertahankan pinned & id & createdAt saat edit
-  notes[currentEditIndex] = {
-    ...oldNote,
-    title: newTitle,
-    content: newContent,
-  };
-
+  notes[currentEditIndex] = { ...old, title: newTitle, content: newContent };
   saveNotes();
   closeModal('edit');
   currentEditIndex = null;
-  showToast('Catatan berhasil diubah.', 'info');
+  showToast('Catatan diubah.', 'info');
 }
 
 function deleteNote(index) {
   const note = notes[index];
   if (!note) return;
-
-  // Konfirmasi inline (tidak pakai confirm() yang memblokir)
   const card = document.querySelector(`.note-card[data-id="${note.id}"]`);
   if (card) {
     card.classList.add('deleting');
-    setTimeout(() => {
-      notes.splice(index, 1);
-      saveNotes();
-      showToast('Catatan dihapus.', 'warning');
-    }, 250);
+    setTimeout(() => { notes.splice(index, 1); saveNotes(); showToast('Catatan dihapus.', 'warning'); }, 250);
   } else {
-    notes.splice(index, 1);
-    saveNotes();
-    showToast('Catatan dihapus.', 'warning');
+    notes.splice(index, 1); saveNotes(); showToast('Catatan dihapus.', 'warning');
   }
 }
 
-// BUG FIX: togglePin menggunakan id unik, bukan judul/konten
 function togglePin(index) {
   if (index < 0 || index >= notes.length) return;
   notes[index].pinned = !notes[index].pinned;
@@ -315,23 +426,14 @@ function togglePin(index) {
   showToast(notes[index].pinned ? 'Catatan dipin.' : 'Pin dilepas.', 'info');
 }
 
-// ─── Pencarian ────────────────────────────────────────────────────────────────
-// BUG FIX: Dipanggil dengan searchNotes() bukan searchNotes
+// ─── Search ───────────────────────────────────────────────────────────────────
 function searchNotes() {
   searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
-  const clearBtn = document.getElementById('searchClear');
-  clearBtn.style.display = searchQuery ? '' : 'none';
-
-  if (!searchQuery) {
-    renderNotes();
-    return;
-  }
-
-  const results = getSortedNotes().filter(note =>
-    note.title.toLowerCase().includes(searchQuery) ||
-    note.content.toLowerCase().includes(searchQuery)
+  document.getElementById('searchClear').style.display = searchQuery ? '' : 'none';
+  if (!searchQuery) { renderNotes(); return; }
+  const results = getSortedNotes().filter(n =>
+    n.title.toLowerCase().includes(searchQuery) || n.content.toLowerCase().includes(searchQuery)
   );
-
   renderNotes(results);
 }
 
@@ -342,57 +444,37 @@ function clearSearch() {
   renderNotes();
 }
 
-// ─── View & Layout ────────────────────────────────────────────────────────────
+// ─── Layout ───────────────────────────────────────────────────────────────────
 function changeGridColumns() {
-  const selected = document.getElementById('gridSelector').value;
-  localStorage.setItem('gridCols', selected);
+  const v = document.getElementById('gridSelector').value;
+  localStorage.setItem('gridCols', v);
+  localStorage.setItem('gridColsSet', '1');
   renderNotes();
 }
 
 function setView(mode, save = true) {
   currentView = mode;
   if (save) localStorage.setItem('viewMode', mode);
-
   document.getElementById('viewGrid').classList.toggle('active', mode === 'grid');
   document.getElementById('viewList').classList.toggle('active', mode === 'list');
-
   const sel = document.getElementById('gridSelector');
-  sel.style.visibility = mode === 'list' ? 'hidden' : 'visible';
-
+  if (sel) sel.style.visibility = mode === 'list' ? 'hidden' : 'visible';
   renderNotes();
 }
 
-// ─── Tema ─────────────────────────────────────────────────────────────────────
-function toggleTheme() {
-  const isDark = document.body.classList.contains('dark-theme');
-  document.body.className = isDark ? 'light-theme' : 'dark-theme';
-  localStorage.setItem('theme', isDark ? 'light' : 'dark');
-}
-
-// ─── Highlight ────────────────────────────────────────────────────────────────
+// ─── Utils ────────────────────────────────────────────────────────────────────
 function highlightMatch(text, query) {
   if (!query) return escapeHTML(text);
   const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
   return escapeHTML(text).replace(regex, '<mark>$1</mark>');
 }
-
-function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
+function escapeRegExp(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 function escapeHTML(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+  const d = document.createElement('div'); d.textContent = text; return d.innerHTML;
 }
 
 // ─── Storage ──────────────────────────────────────────────────────────────────
 function saveNotes() {
   localStorage.setItem('notes', JSON.stringify(notes));
-  // Re-render dengan query aktif (jika ada pencarian)
-  if (searchQuery) {
-    searchNotes();
-  } else {
-    renderNotes();
-  }
+  searchQuery ? searchNotes() : renderNotes();
 }
