@@ -2,11 +2,28 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Catatan" />
+  <meta name="theme-color" id="metaThemeColor" content="#2d6a4f" />
+  <meta name="description" content="Aplikasi catatan pribadi yang cepat dan ringan" />
+
   <title>Catatan Saya</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Apple Touch Icons -->
+  <link rel="apple-touch-icon" href="icons/icon-152x152.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon.ico" />
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -15,9 +32,22 @@
   <!-- Toast Notification -->
   <div id="toast" class="toast" role="alert" aria-live="polite"></div>
 
+  <!-- Install PWA Banner -->
+  <div id="installBanner" class="install-banner" style="display:none">
+    <div class="install-banner-content">
+      <span class="install-banner-icon">✦</span>
+      <span class="install-banner-text">Pasang aplikasi ini di HP kamu</span>
+    </div>
+    <div class="install-banner-actions">
+      <button class="install-btn-yes" id="installBtn">Pasang</button>
+      <button class="install-btn-no" id="installDismiss"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+  </div>
+
   <!-- Modal Edit -->
   <div class="modal-overlay" id="editOverlay">
     <div class="modal-box" id="editModal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+      <div class="modal-handle"></div>
       <div class="modal-header">
         <h2 id="editModalTitle"><i class="fa-solid fa-pen-to-square"></i> Edit Catatan</h2>
         <button class="modal-close" onclick="closeModal('edit')" aria-label="Tutup modal">
@@ -26,9 +56,9 @@
       </div>
       <div class="modal-body">
         <label for="editTitle">Judul</label>
-        <input type="text" id="editTitle" placeholder="Judul catatan..." autocomplete="off" />
+        <input type="text" id="editTitle" placeholder="Judul catatan..." autocomplete="off" autocapitalize="sentences" />
         <label for="editContent">Isi Catatan</label>
-        <textarea id="editContent" rows="8" placeholder="Tulis isi catatan di sini..."></textarea>
+        <textarea id="editContent" rows="8" placeholder="Tulis isi catatan di sini..." autocapitalize="sentences"></textarea>
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal('edit')">Batal</button>
@@ -42,6 +72,7 @@
   <!-- Modal Lihat -->
   <div class="modal-overlay" id="viewOverlay">
     <div class="modal-box" id="viewModal" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
+      <div class="modal-handle"></div>
       <div class="modal-header">
         <h2 id="viewModalTitle" class="view-title-label"><i class="fa-regular fa-eye"></i> Lihat Catatan</h2>
         <button class="modal-close" onclick="closeModal('view')" aria-label="Tutup modal">
@@ -58,9 +89,28 @@
     </div>
   </div>
 
+  <!-- Form Sheet (mobile: slide-up panel) -->
+  <div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+  <div class="form-sheet" id="formSheet">
+    <div class="modal-handle"></div>
+    <div class="sheet-header">
+      <span class="sheet-title">Catatan Baru</span>
+      <button class="modal-close" onclick="closeSheet()" aria-label="Tutup">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="sheet-body">
+      <input class="field" type="text" id="sheetTitle" placeholder="Judul catatan..." autocomplete="off" autocapitalize="sentences" />
+      <textarea class="field" id="sheetContent" placeholder="Tulis sesuatu..." rows="6" autocapitalize="sentences"></textarea>
+      <button class="btn btn-primary btn-full" onclick="addNoteFromSheet()">
+        <i class="fa-solid fa-plus"></i> Simpan Catatan
+      </button>
+    </div>
+  </div>
+
   <!-- App Shell -->
   <div class="app-wrapper">
-    <!-- Sidebar / Header Area -->
+    <!-- Header -->
     <header class="app-header">
       <div class="header-left">
         <div class="logo-mark">✦</div>
@@ -74,11 +124,11 @@
     </header>
 
     <main class="app-main">
-      <!-- Input Panel -->
-      <aside class="input-panel">
+      <!-- Sidebar: Desktop Input Panel -->
+      <aside class="input-panel" id="inputPanel">
         <div class="panel-label">Catatan Baru</div>
-        <input class="field" type="text" id="noteTitle" placeholder="Judul catatan..." autocomplete="off" />
-        <textarea class="field" id="noteContent" placeholder="Tulis sesuatu..." rows="5"></textarea>
+        <input class="field" type="text" id="noteTitle" placeholder="Judul catatan..." autocomplete="off" autocapitalize="sentences" />
+        <textarea class="field" id="noteContent" placeholder="Tulis sesuatu..." rows="5" autocapitalize="sentences"></textarea>
         <button class="btn btn-primary btn-full" onclick="addNote()">
           <i class="fa-solid fa-plus"></i> Simpan Catatan
         </button>
@@ -90,19 +140,20 @@
         <div class="toolbar">
           <div class="search-wrap">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="searchInput" class="search-field" placeholder="Cari catatan..." oninput="searchNotes()" />
+            <input type="text" id="searchInput" class="search-field" placeholder="Cari catatan..."
+              oninput="searchNotes()" autocomplete="off" inputmode="search" />
             <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none" aria-label="Hapus pencarian">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
           <div class="view-controls">
-            <button class="view-btn active" id="viewGrid" onclick="setView('grid')" title="Grid view" aria-label="Tampilan grid">
+            <button class="view-btn active" id="viewGrid" onclick="setView('grid')" title="Grid view" aria-label="Grid">
               <i class="fa-solid fa-grip"></i>
             </button>
-            <button class="view-btn" id="viewList" onclick="setView('list')" title="List view" aria-label="Tampilan list">
+            <button class="view-btn" id="viewList" onclick="setView('list')" title="List view" aria-label="List">
               <i class="fa-solid fa-list"></i>
             </button>
-            <select id="gridSelector" class="cols-select" onchange="changeGridColumns()" aria-label="Jumlah kolom">
+            <select id="gridSelector" class="cols-select" onchange="changeGridColumns()" aria-label="Kolom">
               <option value="1">1 kol</option>
               <option value="2">2 kol</option>
               <option value="3" selected>3 kol</option>
@@ -111,17 +162,17 @@
           </div>
         </div>
 
-        <!-- Stats bar -->
+        <!-- Stats -->
         <div class="stats-bar" id="statsBar"></div>
 
-        <!-- Notes Container -->
+        <!-- Notes -->
         <div id="notes" class="notes-grid"></div>
 
         <!-- Empty State -->
         <div id="emptyState" class="empty-state" style="display:none">
           <div class="empty-icon">📝</div>
           <p class="empty-title">Belum ada catatan</p>
-          <p class="empty-sub">Mulai tulis catatan pertamamu di sebelah kiri.</p>
+          <p class="empty-sub" id="emptySubText">Ketuk tombol + di bawah untuk mulai menulis.</p>
         </div>
 
         <!-- No Results -->
@@ -137,6 +188,11 @@
       &copy; 2026 <strong>Raehan</strong>
     </footer>
   </div>
+
+  <!-- FAB: Mobile add button -->
+  <button class="fab" id="fab" onclick="openSheet()" aria-label="Tambah catatan baru">
+    <i class="fa-solid fa-plus"></i>
+  </button>
 
   <script src="script.js"></script>
 </body>
