@@ -1,11 +1,11 @@
-// ─── State ───────────────────────────────────────────────────────────────────
+// State
 let notes = [];
 let currentEditIndex = null;
 let currentView = 'grid';
 let searchQuery = '';
 let isMobile = false;
 
-// ─── Load Notes ───────────────────────────────────────────────────────────────
+// Load Notes
 function loadNotes() {
   const raw = localStorage.getItem('notes');
   if (!raw) return [];
