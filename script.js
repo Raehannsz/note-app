@@ -30,7 +30,7 @@ function loadNotes() {
       labelId: note.labelId || null,
       createdAt: note.createdAt || Date.now(),
       updatedAt: note.updatedAt || note.createdAt || Date.now(),
-    })) : [];
+    })) ; [];
   } catch { notes = []; }
 
   try {
