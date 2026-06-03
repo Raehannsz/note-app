@@ -11,7 +11,7 @@ const ASSETS = [
   'https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
 ];
-
+ 
 // ─── Install: cache semua aset ────────────────────────────────────────────────
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -25,7 +25,7 @@ self.addEventListener('install', (event) => {
     }).then(() => self.skipWaiting())
   );
 });
-
+ 
 // ─── Activate: bersihkan cache lama ──────────────────────────────────────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
@@ -34,21 +34,21 @@ self.addEventListener('activate', (event) => {
     ).then(() => self.clients.claim())
   );
 });
-
+ 
 // ─── Fetch: Cache-first untuk aset statis, Network-first untuk lainnya ────────
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
-
+ 
   // Hanya tangani GET
   if (request.method !== 'GET') return;
-
+ 
   // Strategi: Cache-first untuk aset statis (CSS, JS, font, gambar)
   const isStatic =
     url.pathname.match(/\.(css|js|png|jpg|jpeg|svg|ico|woff2?)$/) ||
     url.hostname.includes('fonts.googleapis.com') ||
     url.hostname.includes('cdnjs.cloudflare.com');
-
+ 
   if (isStatic) {
     event.respondWith(
       caches.match(request).then(cached => cached || fetch(request).then(res => {
@@ -59,7 +59,7 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
-
+ 
   // Strategi: Network-first untuk HTML (agar selalu fresh)
   if (request.mode === 'navigate') {
     event.respondWith(
