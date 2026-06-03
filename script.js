@@ -1,23 +1,5 @@
-// ─── Constants ────────────────────────────────────────────────────────────────
-const DEFAULT_LABELS = [
-  { id: 'kerja',   name: 'Kerja',   color: '#1a6fa0' },
-  { id: 'pribadi', name: 'Pribadi', color: '#2d6a4f' },
-  { id: 'belanja', name: 'Belanja', color: '#c05621' },
-  { id: 'ide',     name: 'Ide',     color: '#6b46c1' },
-  { id: 'penting', name: 'Penting', color: '#c0392b' },
-];
-
-const SWATCH_COLORS = [
-  '#2d6a4f','#1a6fa0','#6b46c1','#c05621','#c0392b',
-  '#b7791f','#065f46','#1e3a5f','#4a1d96','#7f1d1d',
-  '#374151','#0f766e','#b45309','#be185d','#1d4ed8',
-];
-
-const MAX_CHARS = 5000;
-
-// ─── State ────────────────────────────────────────────────────────────────────
-let notes   = [];
-let labels  = [];
+// ─── State ───────────────────────────────────────────────────────────────────
+let notes = [];
 let currentEditIndex = null;
 let currentView      = 'grid';
 let searchQuery      = '';
@@ -32,11 +14,13 @@ let selectedLabelSheet = null;
 let selectedLabelEdit  = null;
 let newLabelColor      = SWATCH_COLORS[0];
 
-// ─── Load ─────────────────────────────────────────────────────────────────────
-function loadData() {
+// ─── Load Notes ───────────────────────────────────────────────────────────────
+function loadNotes() {
+  const raw = localStorage.getItem('notes');
+  if (!raw) return [];
   try {
-    const n = localStorage.getItem('notes');
-    notes = n ? JSON.parse(n).map((note, i) => ({
+    const parsed = JSON.parse(raw);
+    return parsed.map((note, i) => ({
       id: note.id || Date.now() + i,
       title: note.title || '',
       content: note.content || '',
@@ -872,5 +856,7 @@ function escapeAttr(text) {
 }
 
 // ─── Storage ──────────────────────────────────────────────────────────────────
-function saveNotesRaw() { localStorage.setItem('notes', JSON.stringify(notes)); }
-function saveNotes() { saveNotesRaw(); renderNotes(); }
+function saveNotes() {
+  localStorage.setItem('notes', JSON.stringify(notes));
+  searchQuery ? searchNotes() : renderNotes();
+}
