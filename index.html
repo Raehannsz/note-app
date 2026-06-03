@@ -9,11 +9,18 @@
   <meta name="apple-mobile-web-app-title" content="Catatan" />
   <meta name="theme-color" id="metaThemeColor" content="#2d6a4f" />
   <meta name="description" content="Aplikasi catatan pribadi yang cepat dan ringan" />
+
   <title>Catatan Saya</title>
+
+  <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json" />
+
+  <!-- Apple Touch Icons -->
   <link rel="apple-touch-icon" href="icons/icon-152x152.png" />
   <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon.ico" />
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -22,9 +29,10 @@
 </head>
 <body class="light-theme">
 
+  <!-- Toast Notification -->
   <div id="toast" class="toast" role="alert" aria-live="polite"></div>
 
-  <!-- Install Banner -->
+  <!-- Install PWA Banner -->
   <div id="installBanner" class="install-banner" style="display:none">
     <div class="install-banner-content">
       <span class="install-banner-icon">✦</span>
@@ -36,57 +44,44 @@
     </div>
   </div>
 
-  <!-- ── Modal: Edit Catatan ── -->
+  <!-- Modal Edit -->
   <div class="modal-overlay" id="editOverlay">
-    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modal-box" id="editModal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
       <div class="modal-handle"></div>
       <div class="modal-header">
         <h2 id="editModalTitle"><i class="fa-solid fa-pen-to-square"></i> Edit Catatan</h2>
-        <button class="modal-close" onclick="closeModal('edit')" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
+        <button class="modal-close" onclick="closeModal('edit')" aria-label="Tutup modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
       <div class="modal-body">
         <label for="editTitle">Judul</label>
-        <input type="text" id="editTitle" placeholder="Judul catatan..." autocomplete="off" autocapitalize="sentences"/>
-        <label>Label</label>
-        <div class="label-picker" id="editLabelPicker"></div>
-        <label>Tipe Catatan</label>
-        <div class="type-toggle">
-          <button class="type-btn active" id="editTypeText" onclick="setEditType('text')"><i class="fa-solid fa-align-left"></i> Teks</button>
-          <button class="type-btn" id="editTypeChecklist" onclick="setEditType('checklist')"><i class="fa-solid fa-list-check"></i> Checklist</button>
-        </div>
-        <label for="editContent" id="editContentLabel">Isi Catatan</label>
-        <div class="textarea-wrap">
-          <textarea id="editContent" rows="7" placeholder="Tulis isi catatan..." autocapitalize="sentences" oninput="updateCharCount('editContent','editCharCount')"></textarea>
-          <span class="char-count" id="editCharCount">0 karakter</span>
-        </div>
-        <!-- Checklist editor -->
-        <div id="editChecklistEditor" style="display:none">
-          <div id="editChecklistItems" class="checklist-editor"></div>
-          <button class="btn-add-item" onclick="addChecklistItem('edit')"><i class="fa-solid fa-plus"></i> Tambah item</button>
-        </div>
+        <input type="text" id="editTitle" placeholder="Judul catatan..." autocomplete="off" autocapitalize="sentences" />
+        <label for="editContent">Isi Catatan</label>
+        <textarea id="editContent" rows="8" placeholder="Tulis isi catatan di sini..." autocapitalize="sentences"></textarea>
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal('edit')">Batal</button>
-        <button class="btn btn-primary" onclick="saveEditedNote()"><i class="fa-solid fa-floppy-disk"></i> Simpan</button>
+        <button class="btn btn-primary" onclick="saveEditedNote()">
+          <i class="fa-solid fa-floppy-disk"></i> Simpan
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- ── Modal: Lihat Catatan ── -->
+  <!-- Modal Lihat -->
   <div class="modal-overlay" id="viewOverlay">
-    <div class="modal-box" role="dialog" aria-modal="true">
+    <div class="modal-box" id="viewModal" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
       <div class="modal-handle"></div>
       <div class="modal-header">
-        <div class="view-header-meta">
-          <span class="view-label-dot" id="viewLabelDot"></span>
-          <h2><i class="fa-regular fa-eye"></i> Lihat Catatan</h2>
-        </div>
-        <button class="modal-close" onclick="closeModal('view')" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
+        <h2 id="viewModalTitle" class="view-title-label"><i class="fa-regular fa-eye"></i> Lihat Catatan</h2>
+        <button class="modal-close" onclick="closeModal('view')" aria-label="Tutup modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
       <div class="modal-body">
         <h3 id="viewTitle" class="view-note-title"></h3>
-        <div id="viewMeta" class="view-note-meta"></div>
-        <div id="viewContent" class="view-note-content"></div>
+        <pre id="viewContent" class="view-note-content"></pre>
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal('view')">Tutup</button>
@@ -94,116 +89,49 @@
     </div>
   </div>
 
-  <!-- ── Modal: Kelola Label ── -->
-  <div class="modal-overlay" id="labelMgrOverlay">
-    <div class="modal-box" role="dialog" aria-modal="true">
-      <div class="modal-handle"></div>
-      <div class="modal-header">
-        <h2><i class="fa-solid fa-tags"></i> Kelola Label</h2>
-        <button class="modal-close" onclick="closeModal('labelMgr')" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="modal-body">
-        <div id="labelList" class="label-manager-list"></div>
-        <div class="label-add-row">
-          <input type="text" id="newLabelName" class="field" placeholder="Nama label baru..." maxlength="20" autocomplete="off"/>
-          <div class="color-swatches" id="newLabelColorPicker"></div>
-          <button class="btn btn-primary" onclick="createLabel()"><i class="fa-solid fa-plus"></i> Buat</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Modal: Backup & Restore ── -->
-  <div class="modal-overlay" id="backupOverlay">
-    <div class="modal-box" role="dialog" aria-modal="true">
-      <div class="modal-handle"></div>
-      <div class="modal-header">
-        <h2><i class="fa-solid fa-database"></i> Backup & Restore</h2>
-        <button class="modal-close" onclick="closeModal('backup')" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="modal-body">
-        <div class="backup-section">
-          <p class="backup-desc"><i class="fa-solid fa-cloud-arrow-down"></i> <strong>Export</strong> — Unduh semua catatan sebagai file JSON</p>
-          <button class="btn btn-primary btn-full" onclick="exportNotes()"><i class="fa-solid fa-download"></i> Export Catatan (.json)</button>
-        </div>
-        <div class="backup-divider"></div>
-        <div class="backup-section">
-          <p class="backup-desc"><i class="fa-solid fa-cloud-arrow-up"></i> <strong>Import</strong> — Muat catatan dari file JSON</p>
-          <label class="btn btn-ghost btn-full import-label">
-            <i class="fa-solid fa-upload"></i> Pilih File JSON
-            <input type="file" id="importFile" accept=".json" onchange="importNotes(event)" style="display:none"/>
-          </label>
-          <p class="import-hint">Catatan yang diimpor akan <strong>digabung</strong> dengan catatan yang sudah ada.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Mobile: Form Sheet ── -->
+  <!-- Form Sheet (mobile: slide-up panel) -->
   <div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
   <div class="form-sheet" id="formSheet">
     <div class="modal-handle"></div>
     <div class="sheet-header">
       <span class="sheet-title">Catatan Baru</span>
-      <button class="modal-close" onclick="closeSheet()"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close" onclick="closeSheet()" aria-label="Tutup">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
     <div class="sheet-body">
-      <input class="field" type="text" id="sheetTitle" placeholder="Judul catatan..." autocomplete="off" autocapitalize="sentences"/>
-      <div class="type-toggle">
-        <button class="type-btn active" id="sheetTypeText" onclick="setSheetType('text')"><i class="fa-solid fa-align-left"></i> Teks</button>
-        <button class="type-btn" id="sheetTypeChecklist" onclick="setSheetType('checklist')"><i class="fa-solid fa-list-check"></i> Checklist</button>
-      </div>
-      <div class="label-picker" id="sheetLabelPicker"></div>
-      <div id="sheetTextArea">
-        <div class="textarea-wrap">
-          <textarea class="field" id="sheetContent" placeholder="Tulis sesuatu..." rows="5" autocapitalize="sentences" oninput="updateCharCount('sheetContent','sheetCharCount')"></textarea>
-          <span class="char-count" id="sheetCharCount">0 karakter</span>
-        </div>
-      </div>
-      <div id="sheetChecklistArea" style="display:none">
-        <div id="sheetChecklistItems" class="checklist-editor"></div>
-        <button class="btn-add-item" onclick="addChecklistItem('sheet')"><i class="fa-solid fa-plus"></i> Tambah item</button>
-      </div>
-      <button class="btn btn-primary btn-full" onclick="addNoteFromSheet()"><i class="fa-solid fa-plus"></i> Simpan Catatan</button>
+      <input class="field" type="text" id="sheetTitle" placeholder="Judul catatan..." autocomplete="off" autocapitalize="sentences" />
+      <textarea class="field" id="sheetContent" placeholder="Tulis sesuatu..." rows="6" autocapitalize="sentences"></textarea>
+      <button class="btn btn-primary btn-full" onclick="addNoteFromSheet()">
+        <i class="fa-solid fa-plus"></i> Simpan Catatan
+      </button>
     </div>
   </div>
 
-  <!-- ── App Shell ── -->
+  <!-- App Shell -->
   <div class="app-wrapper">
+    <!-- Header -->
     <header class="app-header">
       <div class="header-left">
         <div class="logo-mark">✦</div>
         <h1 class="app-title">Catatan<span class="title-accent">Saya</span></h1>
       </div>
       <div class="header-right">
-        <span class="offline-badge" id="offlineBadge" style="display:none"><i class="fa-solid fa-wifi-slash"></i> Offline</span>
-        <button class="icon-btn" onclick="openModal('backup')" title="Backup & Restore" aria-label="Backup"><i class="fa-solid fa-database"></i></button>
-        <button class="icon-btn" onclick="openModal('labelMgr')" title="Kelola Label" aria-label="Label"><i class="fa-solid fa-tags"></i></button>
-        <button class="icon-btn" onclick="toggleTheme()" title="Ganti tema" aria-label="Toggle tema"><i class="fa-solid fa-circle-half-stroke"></i></button>
+        <button class="icon-btn" onclick="toggleTheme()" title="Ganti tema" aria-label="Toggle tema">
+          <i class="fa-solid fa-circle-half-stroke"></i>
+        </button>
       </div>
     </header>
 
     <main class="app-main">
-      <!-- Desktop Input Panel -->
+      <!-- Sidebar: Desktop Input Panel -->
       <aside class="input-panel" id="inputPanel">
         <div class="panel-label">Catatan Baru</div>
-        <input class="field" type="text" id="noteTitle" placeholder="Judul catatan..." autocomplete="off" autocapitalize="sentences"/>
-        <div class="type-toggle">
-          <button class="type-btn active" id="panelTypeText" onclick="setPanelType('text')"><i class="fa-solid fa-align-left"></i> Teks</button>
-          <button class="type-btn" id="panelTypeChecklist" onclick="setPanelType('checklist')"><i class="fa-solid fa-list-check"></i> Checklist</button>
-        </div>
-        <div class="label-picker" id="panelLabelPicker"></div>
-        <div id="panelTextArea">
-          <div class="textarea-wrap">
-            <textarea class="field" id="noteContent" placeholder="Tulis sesuatu... (*bold*, _italic_)" rows="5" autocapitalize="sentences" oninput="updateCharCount('noteContent','panelCharCount')"></textarea>
-            <span class="char-count" id="panelCharCount">0 karakter</span>
-          </div>
-        </div>
-        <div id="panelChecklistArea" style="display:none">
-          <div id="panelChecklistItems" class="checklist-editor"></div>
-          <button class="btn-add-item" onclick="addChecklistItem('panel')"><i class="fa-solid fa-plus"></i> Tambah item</button>
-        </div>
-        <button class="btn btn-primary btn-full" onclick="addNote()"><i class="fa-solid fa-plus"></i> Simpan Catatan</button>
+        <input class="field" type="text" id="noteTitle" placeholder="Judul catatan..." autocomplete="off" autocapitalize="sentences" />
+        <textarea class="field" id="noteContent" placeholder="Tulis sesuatu..." rows="5" autocapitalize="sentences"></textarea>
+        <button class="btn btn-primary btn-full" onclick="addNote()">
+          <i class="fa-solid fa-plus"></i> Simpan Catatan
+        </button>
       </aside>
 
       <!-- Notes Area -->
@@ -212,50 +140,56 @@
         <div class="toolbar">
           <div class="search-wrap">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="searchInput" class="search-field" placeholder="Cari catatan..." oninput="searchNotes()" autocomplete="off" inputmode="search"/>
-            <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none"><i class="fa-solid fa-xmark"></i></button>
+            <input type="text" id="searchInput" class="search-field" placeholder="Cari catatan..."
+              oninput="searchNotes()" autocomplete="off" inputmode="search" />
+            <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none" aria-label="Hapus pencarian">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
           </div>
           <div class="view-controls">
-            <button class="view-btn active" id="viewGrid" onclick="setView('grid')" aria-label="Grid"><i class="fa-solid fa-grip"></i></button>
-            <button class="view-btn" id="viewList" onclick="setView('list')" aria-label="List"><i class="fa-solid fa-list"></i></button>
-            <select id="gridSelector" class="cols-select" onchange="changeGridColumns()">
+            <button class="view-btn active" id="viewGrid" onclick="setView('grid')" title="Grid view" aria-label="Grid">
+              <i class="fa-solid fa-grip"></i>
+            </button>
+            <button class="view-btn" id="viewList" onclick="setView('list')" title="List view" aria-label="List">
+              <i class="fa-solid fa-list"></i>
+            </button>
+            <select id="gridSelector" class="cols-select" onchange="changeGridColumns()" aria-label="Kolom">
               <option value="1">1 kol</option>
               <option value="2">2 kol</option>
               <option value="3" selected>3 kol</option>
               <option value="4">4 kol</option>
             </select>
-            <select id="sortSelector" class="cols-select" onchange="changeSort()" aria-label="Urutkan">
-              <option value="newest">Terbaru</option>
-              <option value="oldest">Terlama</option>
-              <option value="az">A–Z</option>
-              <option value="za">Z–A</option>
-              <option value="updated">Diubah</option>
-            </select>
           </div>
         </div>
 
-        <!-- Label Filter Bar -->
-        <div class="label-filter-bar" id="labelFilterBar"></div>
-
+        <!-- Stats -->
         <div class="stats-bar" id="statsBar"></div>
+
+        <!-- Notes -->
         <div id="notes" class="notes-grid"></div>
 
+        <!-- Empty State -->
         <div id="emptyState" class="empty-state" style="display:none">
           <div class="empty-icon">📝</div>
           <p class="empty-title">Belum ada catatan</p>
-          <p class="empty-sub" id="emptySubText">Mulai tulis catatan pertamamu.</p>
+          <p class="empty-sub" id="emptySubText">Ketuk tombol + di bawah untuk mulai menulis.</p>
         </div>
+
+        <!-- No Results -->
         <div id="noResults" class="empty-state" style="display:none">
           <div class="empty-icon">🔍</div>
           <p class="empty-title">Tidak ditemukan</p>
-          <p class="empty-sub">Coba kata kunci atau filter lain.</p>
+          <p class="empty-sub">Coba kata kunci lain.</p>
         </div>
       </section>
     </main>
 
-    <footer class="app-footer">&copy; 2026 <strong>Raehan</strong></footer>
+    <footer class="app-footer">
+      &copy; 2026 <strong>Raehan</strong>
+    </footer>
   </div>
 
+  <!-- FAB: Mobile add button -->
   <button class="fab" id="fab" onclick="openSheet()" aria-label="Tambah catatan baru">
     <i class="fa-solid fa-plus"></i>
   </button>
